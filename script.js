@@ -3,6 +3,42 @@
  * Plain JavaScript Implementation
  */
 
+// --- Navigation ---
+function switchTab(tabId) {
+    state.activeTab = tabId;
+    
+    // Update nav UI
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    const navEl = document.getElementById(`nav-${tabId}`);
+    if (navEl) navEl.classList.add('active');
+    
+    render();
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main-content');
+    const icon = document.getElementById('collapse-icon');
+    
+    sidebar.classList.toggle('sidebar-collapsed');
+    mainContent.classList.toggle('main-content-expanded');
+    
+    if (sidebar.classList.contains('sidebar-collapsed')) {
+        icon.setAttribute('data-lucide', 'chevron-right');
+    } else {
+        icon.setAttribute('data-lucide', 'chevron-left');
+    }
+    
+    lucide.createIcons();
+}
+
+function closeModal() {
+    const modal = document.getElementById('modal-container');
+    if (modal) modal.classList.add('hidden');
+}
+
 // --- State Management ---
 let state = {
     activeTab: 'dashboard',
@@ -48,36 +84,6 @@ function showNotification(text) {
     document.getElementById('notification-text').innerText = text;
     el.classList.remove('translate-y-24');
     setTimeout(() => el.classList.add('translate-y-24'), 3000);
-}
-
-// --- Navigation ---
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const mainContent = document.getElementById('main-content');
-    const icon = document.getElementById('collapse-icon');
-    
-    sidebar.classList.toggle('sidebar-collapsed');
-    mainContent.classList.toggle('main-content-expanded');
-    
-    if (sidebar.classList.contains('sidebar-collapsed')) {
-        icon.setAttribute('data-lucide', 'chevron-right');
-    } else {
-        icon.setAttribute('data-lucide', 'chevron-left');
-    }
-    
-    lucide.createIcons();
-}
-
-function switchTab(tabId) {
-    state.activeTab = tabId;
-    
-    // Update nav UI
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    document.getElementById(`nav-${tabId}`).classList.add('active');
-    
-    render();
 }
 
 // --- Rendering ---
@@ -127,7 +133,7 @@ function renderDashboard(container) {
                                         <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
                                     </div>
                                     <div>
-                                        <p class="font-bold text-sm">${state.students.find(s => s.id === f.studentId)?.name || 'Unknown'}</p>
+                                        <p class="font-bold text-sm">${(state.students.find(s => s.id === f.studentId) || {}).name || 'Unknown'}</p>
                                         <p class="text-xs text-gray-500">${f.month}</p>
                                     </div>
                                 </div>
@@ -215,9 +221,14 @@ function renderStudents(container) {
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <button onclick="deleteStudent('${s.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
-                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                    </button>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button onclick="openEditStudentModal('${s.id}')" class="p-2 text-gray-400 hover:text-[#151619] transition-colors" title="Edit Student">
+                                            <i data-lucide="edit-2" class="w-5 h-5"></i>
+                                        </button>
+                                        <button onclick="deleteStudent('${s.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Delete Student">
+                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         `).join('')}
@@ -258,7 +269,7 @@ function renderFinance(container) {
                         ${state.fees.map(f => `
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4">
-                                    <p class="font-bold text-sm">${state.students.find(s => s.id === f.studentId)?.name || 'Unknown'}</p>
+                                    <p class="font-bold text-sm">${(state.students.find(s => s.id === f.studentId) || {}).name || 'Unknown'}</p>
                                 </td>
                                 <td class="px-6 py-4 text-sm">${f.month}</td>
                                 <td class="px-6 py-4 text-sm font-mono font-bold">${formatPKR(f.amount)}</td>
@@ -268,9 +279,20 @@ function renderFinance(container) {
                                     </button>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <button onclick="deleteFee('${f.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
-                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                    </button>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button onclick="openEditFeeModal('${f.id}')" class="p-2 text-gray-400 hover:text-[#151619] transition-colors" title="Edit Fee">
+                                            <i data-lucide="edit-2" class="w-5 h-5"></i>
+                                        </button>
+                                        <button onclick="printReceipt('${f.id}')" class="p-2 text-gray-400 hover:text-[#151619] transition-colors" title="Print Receipt">
+                                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                                        </button>
+                                        <button onclick="sendWhatsApp('${f.id}')" class="p-2 text-gray-400 hover:text-green-600 transition-colors" title="Send WhatsApp">
+                                            <i data-lucide="message-square" class="w-5 h-5"></i>
+                                        </button>
+                                        <button onclick="deleteFee('${f.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Delete Fee">
+                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         `).join('')}
@@ -315,9 +337,14 @@ function renderExpenses(container) {
                                 <td class="px-6 py-4 text-sm">${e.date}</td>
                                 <td class="px-6 py-4 text-sm font-mono font-bold text-red-600">${formatPKR(e.amount)}</td>
                                 <td class="px-6 py-4 text-right">
-                                    <button onclick="deleteExpense('${e.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
-                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                    </button>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button onclick="openEditExpenseModal('${e.id}')" class="p-2 text-gray-400 hover:text-[#151619] transition-colors" title="Edit Expense">
+                                            <i data-lucide="edit-2" class="w-5 h-5"></i>
+                                        </button>
+                                        <button onclick="deleteExpense('${e.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Delete Expense">
+                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         `).join('')}
@@ -363,9 +390,14 @@ function renderStaff(container) {
                                 <td class="px-6 py-4 text-sm">${t.subjectExpertise.join(', ')}</td>
                                 <td class="px-6 py-4 text-sm font-mono font-bold">${formatPKR(t.salaryRate)}</td>
                                 <td class="px-6 py-4 text-right">
-                                    <button onclick="deleteTeacher('${t.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
-                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                    </button>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button onclick="openEditTeacherModal('${t.id}')" class="p-2 text-gray-400 hover:text-[#151619] transition-colors" title="Edit Teacher">
+                                            <i data-lucide="edit-2" class="w-5 h-5"></i>
+                                        </button>
+                                        <button onclick="deleteTeacher('${t.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Delete Teacher">
+                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         `).join('')}
@@ -600,6 +632,292 @@ function handleSaveTeacher(e) {
     showNotification('Teacher added');
 }
 
+function openEditStudentModal(id) {
+    const student = state.students.find(s => s.id === id);
+    if (!student) return;
+    
+    const modal = document.getElementById('modal-container');
+    modal.innerHTML = `
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                <h3 class="font-bold text-lg">Edit Student</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="handleUpdateStudent(event, '${id}')" class="p-6 space-y-4">
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Name</label>
+                    <input type="text" name="name" value="${student.name}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Father Name</label>
+                    <input type="text" name="fatherName" value="${student.fatherName}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-gray-500 uppercase">Grade</label>
+                        <select name="grade" class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                            ${['Playgroup', 'Nursery', 'Prep', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'].map(g => `<option ${student.grade === g ? 'selected' : ''}>${g}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-gray-500 uppercase">Monthly Fee</label>
+                        <input type="number" name="monthlyFee" value="${student.monthlyFee}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Status</label>
+                    <select name="status" class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                        <option ${student.status === 'Active' ? 'selected' : ''}>Active</option>
+                        <option ${student.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Cancel</button>
+                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#151619] text-white rounded-xl hover:bg-black">Update Student</button>
+                </div>
+            </form>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+    lucide.createIcons();
+}
+
+function handleUpdateStudent(e, id) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const index = state.students.findIndex(s => s.id === id);
+    if (index !== -1) {
+        state.students[index] = {
+            ...state.students[index],
+            name: fd.get('name'),
+            fatherName: fd.get('fatherName'),
+            grade: fd.get('grade'),
+            monthlyFee: Number(fd.get('monthlyFee')),
+            status: fd.get('status')
+        };
+        saveState();
+        closeModal();
+        render();
+        showNotification('Student updated');
+    }
+}
+
+function openEditFeeModal(id) {
+    const fee = state.fees.find(f => f.id === id);
+    if (!fee) return;
+    
+    const modal = document.getElementById('modal-container');
+    modal.innerHTML = `
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                <h3 class="font-bold text-lg">Edit Fee Record</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="handleUpdateFee(event, '${id}')" class="p-6 space-y-4">
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Amount</label>
+                    <input type="number" name="amount" value="${fee.amount}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Month</label>
+                    <input type="month" name="month" value="${fee.month}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Cancel</button>
+                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#151619] text-white rounded-xl hover:bg-black">Update Fee</button>
+                </div>
+            </form>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+    lucide.createIcons();
+}
+
+function handleUpdateFee(e, id) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const index = state.fees.findIndex(f => f.id === id);
+    if (index !== -1) {
+        state.fees[index] = {
+            ...state.fees[index],
+            amount: Number(fd.get('amount')),
+            month: fd.get('month')
+        };
+        saveState();
+        closeModal();
+        render();
+        showNotification('Fee record updated');
+    }
+}
+
+function printReceipt(id) {
+    const fee = state.fees.find(f => f.id === id);
+    const student = fee ? state.students.find(s => s.id === fee.studentId) : null;
+    if (!fee || !student) return;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Fee Receipt - ${student.name}</title>
+                    <style>
+                        body { font-family: sans-serif; padding: 40px; }
+                        .receipt { border: 2px solid #000; padding: 20px; max-width: 500px; margin: auto; }
+                        .header { text-align: center; border-bottom: 1px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
+                        .row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+                        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt">
+                        <div class="header">
+                            <h2>Parwaaz e Shaheen Academy</h2>
+                            <p>Official Fee Receipt</p>
+                        </div>
+                        <div class="row"><strong>Student Name:</strong> <span>${student.name}</span></div>
+                        <div class="row"><strong>Father's Name:</strong> <span>${student.fatherName}</span></div>
+                        <div class="row"><strong>Grade:</strong> <span>${student.grade}</span></div>
+                        <div class="row"><strong>Month:</strong> <span>${fee.month}</span></div>
+                        <div class="row"><strong>Amount:</strong> <span>${formatPKR(fee.amount)}</span></div>
+                        <div class="row"><strong>Status:</strong> <span>${fee.status}</span></div>
+                        <div class="row"><strong>Date:</strong> <span>${new Date().toLocaleDateString()}</span></div>
+                        <div class="footer">
+                            <p>This is a computer generated receipt.</p>
+                        </div>
+                    </div>
+                    <script>window.print();</script>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+}
+
+function sendWhatsApp(id) {
+    const fee = state.fees.find(f => f.id === id);
+    const student = fee ? state.students.find(s => s.id === fee.studentId) : null;
+    if (!fee || !student) return;
+
+    const text = `*Fee Receipt - Parwaaz e Shaheen Academy*\n\nStudent: ${student.name}\nFather: ${student.fatherName}\nGrade: ${student.grade}\nMonth: ${fee.month}\nAmount: ${formatPKR(fee.amount)}\nStatus: ${fee.status}\n\n_Thank you for your support._`;
+    const encodedText = encodeURIComponent(text);
+    const phone = student.contact.replace(/[^0-9]/g, '');
+    window.open(`https://wa.me/${phone}?text=${encodedText}`, '_blank');
+}
+
+function openEditExpenseModal(id) {
+    const expense = state.expenses.find(e => e.id === id);
+    if (!expense) return;
+    
+    const modal = document.getElementById('modal-container');
+    modal.innerHTML = `
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                <h3 class="font-bold text-lg">Edit Expense</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="handleUpdateExpense(event, '${id}')" class="p-6 space-y-4">
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Category</label>
+                    <select name="category" class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                        ${['Rent', 'Electricity', 'Marketing', 'Stationery', 'Salaries', 'Maintenance'].map(c => `<option ${expense.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Description</label>
+                    <input type="text" name="description" value="${expense.description}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Amount</label>
+                    <input type="number" name="amount" value="${expense.amount}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Cancel</button>
+                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#151619] text-white rounded-xl hover:bg-black">Update Expense</button>
+                </div>
+            </form>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+    lucide.createIcons();
+}
+
+function handleUpdateExpense(e, id) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const index = state.expenses.findIndex(ex => ex.id === id);
+    if (index !== -1) {
+        state.expenses[index] = {
+            ...state.expenses[index],
+            category: fd.get('category'),
+            description: fd.get('description'),
+            amount: Number(fd.get('amount'))
+        };
+        saveState();
+        closeModal();
+        render();
+        showNotification('Expense updated');
+    }
+}
+
+function openEditTeacherModal(id) {
+    const teacher = state.teachers.find(t => t.id === id);
+    if (!teacher) return;
+    
+    const modal = document.getElementById('modal-container');
+    modal.innerHTML = `
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                <h3 class="font-bold text-lg">Edit Teacher</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="handleUpdateTeacher(event, '${id}')" class="p-6 space-y-4">
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Name</label>
+                    <input type="text" name="name" value="${teacher.name}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Contact</label>
+                    <input type="text" name="contact" value="${teacher.contact}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Salary Rate</label>
+                    <input type="number" name="salaryRate" value="${teacher.salaryRate}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Expertise (comma separated)</label>
+                    <input type="text" name="expertise" value="${teacher.subjectExpertise.join(', ')}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Cancel</button>
+                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#151619] text-white rounded-xl hover:bg-black">Update Teacher</button>
+                </div>
+            </form>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+    lucide.createIcons();
+}
+
+function handleUpdateTeacher(e, id) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const index = state.teachers.findIndex(t => t.id === id);
+    if (index !== -1) {
+        state.teachers[index] = {
+            ...state.teachers[index],
+            name: fd.get('name'),
+            contact: fd.get('contact'),
+            salaryRate: Number(fd.get('salaryRate')),
+            subjectExpertise: fd.get('expertise').split(',').map(s => s.trim())
+        };
+        saveState();
+        closeModal();
+        render();
+        showNotification('Teacher updated');
+    }
+}
+
 function deleteFee(id) {
     if (confirm('Delete this fee record?')) {
         state.fees = state.fees.filter(f => f.id !== id);
@@ -627,11 +945,36 @@ function deleteTeacher(id) {
     }
 }
 
-function closeModal() {
-    document.getElementById('modal-container').classList.add('hidden');
-}
-
 // --- Initialization ---
+Object.assign(window, {
+    switchTab,
+    toggleSidebar,
+    closeModal,
+    render,
+    openAddStudentModal,
+    handleSaveStudent,
+    deleteStudent,
+    toggleFeeStatus,
+    generateMonthlyFees,
+    openAddExpenseModal,
+    handleSaveExpense,
+    openAddTeacherModal,
+    handleSaveTeacher,
+    openEditStudentModal,
+    handleUpdateStudent,
+    openEditFeeModal,
+    handleUpdateFee,
+    printReceipt,
+    sendWhatsApp,
+    openEditExpenseModal,
+    handleUpdateExpense,
+    openEditTeacherModal,
+    handleUpdateTeacher,
+    deleteFee,
+    deleteExpense,
+    deleteTeacher
+});
+
 window.onload = () => {
     render();
 };
