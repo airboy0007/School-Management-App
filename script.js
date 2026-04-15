@@ -54,16 +54,18 @@ function showNotification(text) {
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('main-content');
-    const floatingBtn = document.getElementById('floating-menu-btn');
+    const icon = document.getElementById('collapse-icon');
     
     sidebar.classList.toggle('sidebar-collapsed');
     mainContent.classList.toggle('main-content-expanded');
     
     if (sidebar.classList.contains('sidebar-collapsed')) {
-        floatingBtn.classList.add('visible');
+        icon.setAttribute('data-lucide', 'chevron-right');
     } else {
-        floatingBtn.classList.remove('visible');
+        icon.setAttribute('data-lucide', 'chevron-left');
     }
+    
+    lucide.createIcons();
 }
 
 function switchTab(tabId) {

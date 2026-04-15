@@ -26,16 +26,22 @@
 
 /* Sidebar Collapsed State */
 .sidebar-collapsed {
-    transform: translateX(-100%);
+    width: 80px !important;
+}
+
+.sidebar-collapsed .sidebar-label {
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    overflow: hidden;
+}
+
+.sidebar-collapsed .sidebar-content {
+    justify-content: center;
 }
 
 .main-content-expanded {
-    margin-left: 0 !important;
-}
-
-#floating-menu-btn.visible {
-    opacity: 1;
-    pointer-events: auto;
+    margin-left: 80px !important;
 }
 
 /* Custom Scrollbar */

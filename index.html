@@ -9,29 +9,21 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
-    <!-- Top Header for Mobile/Collapsed -->
-    <header class="fixed top-0 left-0 right-0 h-16 bg-[#151619] text-white flex items-center px-6 z-[60] lg:hidden">
-        <button onclick="toggleSidebar()" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
-            <i data-lucide="menu" class="w-6 h-6"></i>
-        </button>
-        <span class="ml-4 font-bold">Parwaaz e Shaheen</span>
-    </header>
-
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside id="sidebar" class="bg-[#151619] text-white flex flex-col fixed h-full z-50 transition-all duration-300 w-64 shadow-2xl">
+        <aside id="sidebar" class="bg-[#151619] text-white flex flex-col fixed h-full z-50 transition-all duration-300 w-64">
             <div class="p-6 border-b border-white/10 flex items-center justify-between">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 sidebar-content">
                     <div class="bg-white p-2 rounded-xl shrink-0">
                         <i data-lucide="graduation-cap" class="text-[#151619] w-6 h-6"></i>
                     </div>
-                    <div>
+                    <div class="sidebar-label transition-opacity duration-200">
                         <h1 class="font-bold text-lg leading-tight whitespace-nowrap">Parwaaz e Shaheen</h1>
                         <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Academy Management</p>
                     </div>
                 </div>
                 <button onclick="toggleSidebar()" class="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white">
-                    <i data-lucide="menu" class="w-6 h-6"></i>
+                    <i id="collapse-icon" data-lucide="chevron-left" class="w-5 h-5"></i>
                 </button>
             </div>
             
@@ -58,24 +50,19 @@
                 </button>
             </nav>
 
-            <div class="p-4 border-t border-white/10">
+            <div class="p-4 border-t border-white/10 sidebar-content">
                 <div class="bg-white/5 p-4 rounded-2xl">
-                    <p class="text-[10px] text-gray-400 uppercase font-bold mb-2">System Status</p>
+                    <p class="text-[10px] text-gray-400 uppercase font-bold mb-2 sidebar-label">System Status</p>
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse shrink-0"></div>
-                        <span class="text-xs font-medium">Online & Secure</span>
+                        <span class="text-xs font-medium sidebar-label">Online & Secure</span>
                     </div>
                 </div>
             </div>
         </aside>
 
-        <!-- Floating Menu Button (Visible when sidebar is closed) -->
-        <button id="floating-menu-btn" onclick="toggleSidebar()" class="fixed top-6 left-6 z-[40] p-3 bg-[#151619] text-white rounded-xl shadow-xl hover:bg-black transition-all opacity-0 pointer-events-none">
-            <i data-lucide="menu" class="w-6 h-6"></i>
-        </button>
-
         <!-- Main Content -->
-        <main id="main-content" class="flex-1 ml-64 p-8 transition-all duration-300 mt-16 lg:mt-0">
+        <main id="main-content" class="flex-1 ml-64 p-8 transition-all duration-300">
             <div id="view-container">
                 <!-- Views will be injected here -->
             </div>
