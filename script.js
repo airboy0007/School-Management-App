@@ -51,6 +51,21 @@ function showNotification(text) {
 }
 
 // --- Navigation ---
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main-content');
+    const floatingBtn = document.getElementById('floating-menu-btn');
+    
+    sidebar.classList.toggle('sidebar-collapsed');
+    mainContent.classList.toggle('main-content-expanded');
+    
+    if (sidebar.classList.contains('sidebar-collapsed')) {
+        floatingBtn.classList.add('visible');
+    } else {
+        floatingBtn.classList.remove('visible');
+    }
+}
+
 function switchTab(tabId) {
     state.activeTab = tabId;
     
