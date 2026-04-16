@@ -98,6 +98,7 @@ function render() {
         case 'finance': renderFinance(container); break;
         case 'expenses': renderExpenses(container); break;
         case 'staff': renderStaff(container); break;
+        case 'backup': renderBackup(container); break;
     }
     
     lucide.createIcons();
@@ -946,6 +947,90 @@ function deleteTeacher(id) {
     }
 }
 
+// --- Backup & Restore Module ---
+function renderBackup(container) {
+    container.innerHTML = `
+        <div class="animate-in">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold tracking-tight">Backup & Restore</h2>
+                <p class="text-gray-500">Secure your data locally on your computer.</p>
+            </div>
+
+            <div class="max-w-2xl">
+                <!-- Local Backup -->
+                <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                            <i data-lucide="hard-drive" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-xl">Local Database Backup</h3>
+                            <p class="text-sm text-gray-500">Download or restore your academy data.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button onclick="exportData()" class="bg-[#151619] text-white py-3 rounded-xl font-semibold hover:bg-black transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="download" class="w-5 h-5"></i>
+                            Download Backup
+                        </button>
+                        <label class="border-2 border-dashed border-gray-200 py-3 rounded-xl font-semibold text-gray-600 hover:border-gray-400 transition-all flex items-center justify-center gap-2 cursor-pointer text-center">
+                            <i data-lucide="upload" class="w-5 h-5"></i>
+                            Restore from File
+                            <input type="file" class="hidden" onchange="importData(event)" accept=".json">
+                        </label>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-gray-100">
+                        <h4 class="font-bold text-sm text-gray-900 mb-2 flex items-center gap-2">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-green-500"></i>
+                            Security Note
+                        </h4>
+                        <p class="text-xs text-gray-500 leading-relaxed">
+                            Your data is stored locally in your browser. We recommend downloading a backup at the end of every week to ensure your records are safe even if you clear your browser history.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function exportData() {
+    const data = JSON.stringify(state, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `psa_backup_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showNotification('Backup downloaded successfully');
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const importedState = JSON.parse(e.target.result);
+            if (confirm('This will overwrite all current data. Are you sure?')) {
+                state = { ...state, ...importedState };
+                saveState();
+                render();
+                showNotification('Data restored successfully');
+            }
+        } catch (err) {
+            showNotification('Invalid backup file');
+        }
+    };
+    reader.readAsText(file);
+}
+
 // --- Initialization ---
 Object.assign(window, {
     switchTab,
@@ -973,7 +1058,10 @@ Object.assign(window, {
     handleUpdateTeacher,
     deleteFee,
     deleteExpense,
-    deleteTeacher
+    deleteTeacher,
+    renderBackup,
+    exportData,
+    importData
 });
 
 window.onload = () => {
