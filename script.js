@@ -15,13 +15,12 @@ function switchTab(tabId) {
     const navEl = document.getElementById(`nav-${tabId}`);
     if (navEl) navEl.classList.add('active');
     
-    // Close sidebar on mobile
+    // Close sidebar on mobile with proper logic
     if (window.innerWidth < 768) {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
-        sidebar.classList.add('-translate-x-full');
-        if (overlay) {
-            overlay.classList.add('hidden', 'opacity-0');
+        if (!sidebar.classList.contains('-translate-x-full')) {
+            toggleSidebar();
         }
     }
     
@@ -120,12 +119,12 @@ function showNotification(text) {
 }
 
 function handleLogout() {
-    if (confirm('Are you sure you want to logout?')) {
+    openConfirmModal('Logout', 'Are you sure you want to end your session?', () => {
         showNotification('Logging out...');
         setTimeout(() => {
             window.location.reload();
         }, 1000);
-    }
+    });
 }
 
 // --- Rendering ---
@@ -699,13 +698,13 @@ function handleSaveStudent(e) {
 }
 
 function deleteStudent(id) {
-    if (confirm('Are you sure you want to delete this student?')) {
+    openConfirmModal('Delete Student', 'This will permanently remove the student and all their records.', () => {
         state.students = state.students.filter(s => s.id !== id);
         state.fees = state.fees.filter(f => f.studentId !== id);
         saveState();
         render();
         showNotification('Student deleted');
-    }
+    });
 }
 
 function toggleFeeStatus(id) {
@@ -1142,31 +1141,31 @@ function handleUpdateTeacher(e, id) {
 }
 
 function deleteFee(id) {
-    if (confirm('Delete this fee record?')) {
+    openConfirmModal('Delete Fee', 'Are you sure you want to delete this fee record?', () => {
         state.fees = state.fees.filter(f => f.id !== id);
         saveState();
         render();
         showNotification('Fee record deleted');
-    }
+    });
 }
 
 function deleteExpense(id) {
-    if (confirm('Delete this expense?')) {
+    openConfirmModal('Delete Expense', 'Are you sure you want to delete this expense record?', () => {
         state.expenses = state.expenses.filter(e => e.id !== id);
         saveState();
         render();
         showNotification('Expense deleted');
-    }
+    });
 }
 
 function deleteTeacher(id) {
-    if (confirm('Delete this teacher?')) {
+    openConfirmModal('Delete Teacher', 'Deleting a teacher will also remove their salary history.', () => {
         state.teachers = state.teachers.filter(t => t.id !== id);
         state.salaries = state.salaries.filter(s => s.teacherId !== id);
         saveState();
         render();
         showNotification('Teacher deleted');
-    }
+    });
 }
 
 function openPaySalaryModal(teacherId) {
@@ -1287,12 +1286,12 @@ function sendStaffWhatsApp(id) {
 }
 
 function deleteSalaryRecord(id) {
-    if (confirm('Delete this salary record?')) {
+    openConfirmModal('Delete Salary', 'Are you sure you want to delete this salary record?', () => {
         state.salaries = state.salaries.filter(s => s.id !== id);
         saveState();
         render();
         showNotification('Salary record deleted');
-    }
+    });
 }
 
 // --- Backup & Restore Module ---
@@ -1358,6 +1357,31 @@ function exportData() {
     showNotification('Backup downloaded successfully');
 }
 
+function openConfirmModal(title, message, onConfirm) {
+    const modal = document.getElementById('modal-container');
+    modal.innerHTML = `
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden modal-enter border border-red-500/20">
+            <div class="px-6 py-4 border-b border-red-500/10 flex items-center justify-between bg-red-50">
+                <h3 class="font-bold text-lg text-red-600">${title}</h3>
+                <button onclick="closeModal()" class="text-red-400 hover:text-red-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600 text-sm mb-6">${message}</p>
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Cancel</button>
+                    <button id="confirm-action-btn" class="px-6 py-2 text-sm font-semibold bg-red-600 text-white rounded-xl hover:bg-red-700 shadow-lg shadow-red-500/20 transition-all">Confirm Action</button>
+                </div>
+            </div>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+    document.getElementById('confirm-action-btn').onclick = () => {
+        onConfirm();
+        closeModal();
+    };
+    lucide.createIcons();
+}
+
 function importData(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1366,12 +1390,12 @@ function importData(event) {
     reader.onload = (e) => {
         try {
             const importedState = JSON.parse(e.target.result);
-            if (confirm('This will overwrite all current data. Are you sure?')) {
+            openConfirmModal('Restore Data', 'This will overwrite EVERYTHING! Make sure you have a backup of current data.', () => {
                 state = { ...state, ...importedState };
                 saveState();
                 render();
                 showNotification('Data restored successfully');
-            }
+            });
         } catch (err) {
             showNotification('Invalid backup file');
         }
@@ -1413,6 +1437,7 @@ Object.assign(window, {
     printStaffReceipt,
     sendStaffWhatsApp,
     deleteSalaryRecord,
+    openConfirmModal,
     renderBackup,
     exportData,
     importData
