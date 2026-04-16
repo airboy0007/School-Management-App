@@ -28,7 +28,6 @@ function switchTab(tabId) {
 }
 
 function toggleSidebar() {
-    console.log('Toggling sidebar...');
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('main-content');
     const icon = document.getElementById('collapse-icon');
@@ -45,16 +44,25 @@ function toggleSidebar() {
             icon.setAttribute('data-lucide', 'chevron-left');
         }
     } else {
-        // Mobile behavior
-        const isHidden = sidebar.classList.contains('-translate-x-full');
-        if (isHidden) {
+        // Mobile behavior - Force state
+        const isCurrentlyHidden = sidebar.classList.contains('-translate-x-full');
+        
+        if (isCurrentlyHidden) {
+            // Open
             sidebar.classList.remove('-translate-x-full');
-            overlay.classList.remove('hidden');
-            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            if (overlay) {
+                overlay.classList.remove('hidden');
+                // Trigger reflow
+                overlay.offsetHeight;
+                overlay.classList.remove('opacity-0');
+            }
         } else {
+            // Close
             sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('opacity-0');
-            setTimeout(() => overlay.classList.add('hidden'), 300);
+            if (overlay) {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
         }
     }
     
@@ -1305,9 +1313,9 @@ function renderBackup(container) {
 
             <div class="max-w-2xl">
                 <!-- Local Backup -->
-                <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+                <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
                     <div class="flex items-center gap-4 mb-6">
-                        <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                        <div class="p-3 bg-cyan-500/10 text-cyan-600 rounded-xl">
                             <i data-lucide="hard-drive" class="w-8 h-8"></i>
                         </div>
                         <div>
