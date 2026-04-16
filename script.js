@@ -2,6 +2,7 @@
  * Parwaaz e Shaheen Academy Management System
  * Plain JavaScript Implementation
  */
+console.log('PSA Management System v1.1 Loaded');
 
 // --- Navigation ---
 function switchTab(tabId) {
