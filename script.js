@@ -179,15 +179,18 @@ function renderDashboard(container) {
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                ${renderStatCard('Total Revenue', formatPKR(totalRevenue), 'dollar-sign', 'bg-green-50 text-green-600')}
-                ${renderStatCard('Pending Fees', formatPKR(pendingFees), 'clock', 'bg-amber-50 text-amber-600')}
-                ${renderStatCard('Expenses', formatPKR(totalExpenses), 'receipt', 'bg-red-50 text-red-600')}
-                ${renderStatCard('Students', state.students.length, 'users', 'bg-blue-50 text-blue-600')}
+                ${renderStatCard('Total Revenue', formatPKR(totalRevenue), 'dollar-sign', 'bg-cyan-500/10 text-cyan-600', false)}
+                ${renderStatCard('Pending Fees', formatPKR(pendingFees), 'clock', 'bg-amber-500/10 text-amber-600', false)}
+                ${renderStatCard('Expenses', formatPKR(totalExpenses), 'receipt', 'bg-red-500/10 text-red-600', false)}
+                ${renderStatCard('Students', state.students.length, 'users', 'bg-[#ffd700]/10 text-[#001f3f]', true)}
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <h3 class="font-bold text-lg mb-4">Recent Fee Collections</h3>
+                <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                    <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-2">
+                        <h3 class="font-bold text-lg text-[#001f3f]">Recent Fee Collections</h3>
+                        <span class="text-[10px] font-bold text-cyan-600 uppercase tracking-widest">Live Updates</span>
+                    </div>
                     <div class="space-y-4">
                         ${state.fees.slice(0, 5).map(f => `
                             <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl transition-colors">
@@ -201,7 +204,7 @@ function renderDashboard(container) {
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <p class="font-bold text-sm text-[#151619]">${formatPKR(f.amount)}</p>
+                                    <p class="font-bold text-sm text-[#001f3f]">${formatPKR(f.amount)}</p>
                                     <p class="text-[10px] font-bold uppercase ${f.status === 'Paid' ? 'text-green-500' : 'text-amber-500'}">${f.status}</p>
                                 </div>
                             </div>
@@ -213,7 +216,7 @@ function renderDashboard(container) {
                     <h3 class="font-bold text-lg mb-4">Quick Actions</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <button onclick="switchTab('students')" class="p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all text-left">
-                            <i data-lucide="user-plus" class="w-6 h-6 mb-2 text-blue-600"></i>
+                            <i data-lucide="user-plus" class="w-6 h-6 mb-2 text-cyan-600"></i>
                             <p class="font-bold text-sm">Add Student</p>
                             <p class="text-xs text-gray-500">New enrollment</p>
                         </button>
@@ -229,9 +232,9 @@ function renderDashboard(container) {
     `;
 }
 
-function renderStatCard(label, value, icon, iconClass) {
+function renderStatCard(label, value, icon, iconClass, isGold) {
     return `
-        <div class="stat-card bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+        <div class="stat-card bg-white p-6 rounded-2xl border border-gray-100 shadow-sm ${isGold ? 'gold-trim' : ''}">
             <div class="flex items-center justify-between mb-4">
                 <div class="p-2 ${iconClass} rounded-xl">
                     <i data-lucide="${icon}" class="w-6 h-6"></i>
@@ -275,23 +278,23 @@ function renderStudents(container) {
                             <option value="Inactive" ${state.filters.students.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
                         </select>
                     </div>
-                    <button onclick="openAddStudentModal()" class="w-full lg:w-auto bg-[#151619] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-black transition-all flex items-center justify-center gap-2">
+                    <button onclick="openAddStudentModal()" class="w-full lg:w-auto bg-[#001f3f] text-[#00fbff] px-6 py-2.5 rounded-xl font-semibold hover:bg-[#001233] border border-[#00fbff]/30 transition-all flex items-center justify-center gap-2">
                         <i data-lucide="plus" class="w-5 h-5"></i>
                         Add Student
                     </button>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left min-w-[700px] lg:min-w-0">
-                    <thead class="bg-gray-50 border-b border-gray-100">
+                    <thead class="table-header-themed">
                         <tr>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Student</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Grade</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Monthly Fee</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Status</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500 text-right">Actions</th>
+                            <th class="px-6 py-4">Student</th>
+                            <th class="px-6 py-4">Grade</th>
+                            <th class="px-6 py-4">Monthly Fee</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -310,7 +313,7 @@ function renderStudents(container) {
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <button onclick="openEditStudentModal('${s.id}')" class="p-2 text-gray-400 hover:text-[#151619] transition-colors" title="Edit Student">
+                                        <button onclick="openEditStudentModal('${s.id}')" class="p-2 text-gray-400 hover:text-cyan-600 transition-colors" title="Edit Student">
                                             <i data-lucide="edit-2" class="w-5 h-5"></i>
                                         </button>
                                         <button onclick="deleteStudent('${s.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Delete Student">
@@ -364,23 +367,23 @@ function renderFinance(container) {
                             <option value="Pending" ${state.filters.finance.status === 'Pending' ? 'selected' : ''}>Pending</option>
                         </select>
                     </div>
-                    <button onclick="generateMonthlyFees()" class="w-full lg:w-auto bg-[#151619] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-black transition-all flex items-center justify-center gap-2">
+                    <button onclick="generateMonthlyFees()" class="w-full lg:w-auto bg-[#ffd700] text-[#001f3f] px-6 py-2.5 rounded-xl font-semibold hover:bg-[#ffcc00] transition-all flex items-center justify-center gap-2">
                         <i data-lucide="refresh-cw" class="w-5 h-5"></i>
                         Generate Monthly Fees
                     </button>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left min-w-[800px] lg:min-w-0">
-                    <thead class="bg-gray-50 border-b border-gray-100">
+                    <thead class="table-header-themed">
                         <tr>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Student</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Month</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Amount</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Status</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500 text-right">Actions</th>
+                            <th class="px-6 py-4">Student</th>
+                            <th class="px-6 py-4">Month</th>
+                            <th class="px-6 py-4">Amount</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -398,10 +401,10 @@ function renderFinance(container) {
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <button onclick="openEditFeeModal('${f.id}')" class="p-2 text-gray-400 hover:text-[#151619] transition-colors" title="Edit Fee">
+                                        <button onclick="openEditFeeModal('${f.id}')" class="p-2 text-gray-400 hover:text-cyan-600 transition-colors" title="Edit Fee">
                                             <i data-lucide="edit-2" class="w-5 h-5"></i>
                                         </button>
-                                        <button onclick="printReceipt('${f.id}')" class="p-2 text-gray-400 hover:text-[#151619] transition-colors" title="Print Receipt">
+                                        <button onclick="printReceipt('${f.id}')" class="p-2 text-gray-400 hover:text-cyan-600 transition-colors" title="Print Receipt">
                                             <i data-lucide="file-text" class="w-5 h-5"></i>
                                         </button>
                                         <button onclick="sendWhatsApp('${f.id}')" class="p-2 text-gray-400 hover:text-green-600 transition-colors" title="Send WhatsApp">
@@ -435,22 +438,22 @@ function renderExpenses(container) {
                     <h2 class="text-2xl font-bold tracking-tight">Expense Tracker</h2>
                     <p class="text-gray-500 text-sm">Monitor academy operational costs.</p>
                 </div>
-                <button onclick="openAddExpenseModal()" class="w-full sm:w-auto bg-[#151619] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-black transition-all flex items-center justify-center gap-2">
+                <button onclick="openAddExpenseModal()" class="w-full sm:w-auto bg-[#001f3f] text-[#00fbff] px-6 py-2.5 rounded-xl font-semibold hover:bg-[#001233] border border-[#00fbff]/30 transition-all flex items-center justify-center gap-2">
                     <i data-lucide="plus" class="w-5 h-5"></i>
                     Add Expense
                 </button>
             </div>
 
-            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left min-w-[600px] sm:min-w-0">
-                    <thead class="bg-gray-50 border-b border-gray-100">
+                    <thead class="table-header-themed">
                         <tr>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Category</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Description</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Date</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Amount</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500 text-right">Actions</th>
+                            <th class="px-6 py-4">Category</th>
+                            <th class="px-6 py-4">Description</th>
+                            <th class="px-6 py-4">Date</th>
+                            <th class="px-6 py-4">Amount</th>
+                            <th class="px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -462,7 +465,7 @@ function renderExpenses(container) {
                                 <td class="px-6 py-4 text-sm font-mono font-bold text-red-600">${formatPKR(e.amount)}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <button onclick="openEditExpenseModal('${e.id}')" class="p-2 text-gray-400 hover:text-[#151619] transition-colors" title="Edit Expense">
+                                        <button onclick="openEditExpenseModal('${e.id}')" class="p-2 text-gray-400 hover:text-cyan-600 transition-colors" title="Edit Expense">
                                             <i data-lucide="edit-2" class="w-5 h-5"></i>
                                         </button>
                                         <button onclick="deleteExpense('${e.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Delete Expense">
@@ -489,7 +492,7 @@ function renderStaff(container) {
                     <h2 class="text-2xl font-bold tracking-tight">Staff & Payroll</h2>
                     <p class="text-gray-500 text-sm">Manage teachers and process salaries.</p>
                 </div>
-                <button onclick="openAddTeacherModal()" class="w-full sm:w-auto bg-[#151619] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-black transition-all flex items-center justify-center gap-2">
+                <button onclick="openAddTeacherModal()" class="w-full sm:w-auto bg-[#001f3f] text-[#00fbff] px-6 py-2.5 rounded-xl font-semibold hover:bg-[#001233] border border-[#00fbff]/30 transition-all flex items-center justify-center gap-2">
                     <i data-lucide="plus" class="w-5 h-5"></i>
                     Add Teacher
                 </button>
@@ -498,11 +501,11 @@ function renderStaff(container) {
             <!-- Sub Tabs (Pill Style) -->
             <div class="flex gap-2 mb-8 bg-gray-100/80 p-1.5 rounded-2xl w-full sm:w-fit border border-gray-200 overflow-x-auto no-scrollbar">
                 <button onclick="state.staffTab = 'staff'; render()" 
-                    class="flex-1 sm:flex-none whitespace-nowrap px-6 sm:px-8 py-2.5 text-sm font-bold rounded-xl transition-all ${state.staffTab === 'staff' ? 'bg-[#151619] text-white shadow-lg' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}">
+                    class="flex-1 sm:flex-none whitespace-nowrap px-6 sm:px-8 py-2.5 text-sm font-bold rounded-xl transition-all ${state.staffTab === 'staff' ? 'bg-[#001f3f] text-[#00fbff] shadow-lg border border-[#00fbff]/30' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}">
                     Staff List
                 </button>
                 <button onclick="state.staffTab = 'payroll'; render()" 
-                    class="flex-1 sm:flex-none whitespace-nowrap px-6 sm:px-8 py-2.5 text-sm font-bold rounded-xl transition-all ${state.staffTab === 'payroll' ? 'bg-[#151619] text-white shadow-lg' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}">
+                    class="flex-1 sm:flex-none whitespace-nowrap px-6 sm:px-8 py-2.5 text-sm font-bold rounded-xl transition-all ${state.staffTab === 'payroll' ? 'bg-[#001f3f] text-[#00fbff] shadow-lg border border-[#00fbff]/30' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}">
                     Payroll History
                 </button>
             </div>
@@ -510,18 +513,18 @@ function renderStaff(container) {
             <div class="grid grid-cols-1 gap-8">
                 ${state.staffTab === 'staff' ? `
                     <!-- Teachers List -->
-                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                            <h3 class="font-bold text-sm uppercase tracking-wider text-gray-500">Active Teachers & Staff</h3>
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 bg-[#001f3f]/5">
+                            <h3 class="font-bold text-sm uppercase tracking-wider text-[#001f3f]">Active Teachers & Staff</h3>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left min-w-[600px] sm:min-w-0">
-                            <thead class="bg-gray-50 border-b border-gray-100">
+                            <thead class="table-header-themed">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Teacher</th>
-                                    <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Expertise</th>
-                                    <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Salary Rate</th>
-                                    <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500 text-right">Actions</th>
+                                    <th class="px-6 py-4">Teacher</th>
+                                    <th class="px-6 py-4">Expertise</th>
+                                    <th class="px-6 py-4">Salary Rate</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
@@ -539,7 +542,7 @@ function renderStaff(container) {
                                                     <i data-lucide="banknote" class="w-3 h-3"></i>
                                                     Pay
                                                 </button>
-                                                <button onclick="openEditTeacherModal('${t.id}')" class="p-2 text-gray-400 hover:text-[#151619] transition-colors" title="Edit Teacher">
+                                                <button onclick="openEditTeacherModal('${t.id}')" class="p-2 text-gray-400 hover:text-cyan-600 transition-colors" title="Edit Teacher">
                                                     <i data-lucide="edit-2" class="w-5 h-5"></i>
                                                 </button>
                                                 <button onclick="deleteTeacher('${t.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Delete Teacher">
@@ -555,19 +558,19 @@ function renderStaff(container) {
                 </div>
                 ` : `
                     <!-- Salary History -->
-                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                            <h3 class="font-bold text-sm uppercase tracking-wider text-gray-500">Salary Payment History</h3>
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 bg-[#001f3f]/5">
+                            <h3 class="font-bold text-sm uppercase tracking-wider text-[#001f3f]">Salary Payment History</h3>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left min-w-[600px] sm:min-w-0">
-                                <thead class="bg-gray-50 border-b border-gray-100">
+                                <thead class="table-header-themed">
                                     <tr>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Teacher</th>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Month</th>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Amount</th>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500 hidden sm:table-cell">Date</th>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500 text-right">Actions</th>
+                                        <th class="px-6 py-4">Teacher</th>
+                                        <th class="px-6 py-4">Month</th>
+                                        <th class="px-6 py-4">Amount</th>
+                                        <th class="px-6 py-4 hidden sm:table-cell">Date</th>
+                                        <th class="px-6 py-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
@@ -584,7 +587,7 @@ function renderStaff(container) {
                                                 <td class="px-6 py-4 text-sm text-gray-500 hidden sm:table-cell">${s.paidAt}</td>
                                                 <td class="px-6 py-4 text-right">
                                                     <div class="flex items-center justify-end gap-1 sm:gap-2">
-                                                        <button onclick="printStaffReceipt('${s.id}')" class="p-1.5 sm:p-2 text-gray-400 hover:text-blue-600 transition-colors" title="Print Receipt">
+                                                        <button onclick="printStaffReceipt('${s.id}')" class="p-1.5 sm:p-2 text-gray-400 hover:text-cyan-600 transition-colors" title="Print Receipt">
                                                             <i data-lucide="printer" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                                                         </button>
                                                         <button onclick="sendStaffWhatsApp('${s.id}')" class="p-1.5 sm:p-2 text-gray-400 hover:text-green-600 transition-colors" title="Send WhatsApp">
@@ -616,10 +619,10 @@ function renderStaff(container) {
 function openAddStudentModal() {
     const modal = document.getElementById('modal-container');
     modal.innerHTML = `
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                <h3 class="font-bold text-lg">Add New Student</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter border border-[#00fbff]/20">
+            <div class="px-6 py-4 border-b border-[#00fbff]/10 flex items-center justify-between bg-[#001f3f]">
+                <h3 class="font-bold text-lg text-[#00fbff]">Add New Student</h3>
+                <button onclick="closeModal()" class="text-[#00fbff]/60 hover:text-[#00fbff]"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form onsubmit="handleSaveStudent(event)" class="p-6 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
@@ -654,7 +657,7 @@ function openAddStudentModal() {
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#151619] text-white rounded-xl hover:bg-black">Save Student</button>
+                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#001f3f] text-[#00fbff] rounded-xl hover:bg-[#001233] border border-[#00fbff]/50">Save Student</button>
                 </div>
             </form>
         </div>
@@ -743,10 +746,10 @@ function generateMonthlyFees() {
 function openAddExpenseModal() {
     const modal = document.getElementById('modal-container');
     modal.innerHTML = `
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                <h3 class="font-bold text-lg">Add New Expense</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter border border-[#00fbff]/20">
+            <div class="px-6 py-4 border-b border-[#00fbff]/10 flex items-center justify-between bg-[#001f3f]">
+                <h3 class="font-bold text-lg text-[#00fbff]">Add New Expense</h3>
+                <button onclick="closeModal()" class="text-[#00fbff]/60 hover:text-[#00fbff]"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form onsubmit="handleSaveExpense(event)" class="p-6 space-y-4">
                 <div class="space-y-1">
@@ -767,7 +770,7 @@ function openAddExpenseModal() {
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#151619] text-white rounded-xl hover:bg-black">Save Expense</button>
+                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#001f3f] text-[#00fbff] rounded-xl hover:bg-[#001233] border border-[#00fbff]/50">Save Expense</button>
                 </div>
             </form>
         </div>
@@ -795,10 +798,10 @@ function handleSaveExpense(e) {
 function openAddTeacherModal() {
     const modal = document.getElementById('modal-container');
     modal.innerHTML = `
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                <h3 class="font-bold text-lg">Add New Teacher</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter border border-[#00fbff]/20">
+            <div class="px-6 py-4 border-b border-[#00fbff]/10 flex items-center justify-between bg-[#001f3f]">
+                <h3 class="font-bold text-lg text-[#00fbff]">Add New Teacher</h3>
+                <button onclick="closeModal()" class="text-[#00fbff]/60 hover:text-[#00fbff]"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form onsubmit="handleSaveTeacher(event)" class="p-6 space-y-4">
                 <div class="space-y-1">
@@ -819,7 +822,7 @@ function openAddTeacherModal() {
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#151619] text-white rounded-xl hover:bg-black">Save Teacher</button>
+                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#001f3f] text-[#00fbff] rounded-xl hover:bg-[#001233] border border-[#00fbff]/50">Save Teacher</button>
                 </div>
             </form>
         </div>
@@ -851,10 +854,10 @@ function openEditStudentModal(id) {
     
     const modal = document.getElementById('modal-container');
     modal.innerHTML = `
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                <h3 class="font-bold text-lg">Edit Student</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter border border-[#00fbff]/20">
+            <div class="px-6 py-4 border-b border-[#00fbff]/10 flex items-center justify-between bg-[#001f3f]">
+                <h3 class="font-bold text-lg text-[#00fbff]">Edit Student</h3>
+                <button onclick="closeModal()" class="text-[#00fbff]/60 hover:text-[#00fbff]"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form onsubmit="handleUpdateStudent(event, '${id}')" class="p-6 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
@@ -892,7 +895,7 @@ function openEditStudentModal(id) {
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#151619] text-white rounded-xl hover:bg-black">Update Student</button>
+                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#001f3f] text-[#00fbff] rounded-xl hover:bg-[#001233] border border-[#00fbff]/50">Update Student</button>
                 </div>
             </form>
         </div>
@@ -928,10 +931,10 @@ function openEditFeeModal(id) {
     
     const modal = document.getElementById('modal-container');
     modal.innerHTML = `
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                <h3 class="font-bold text-lg">Edit Fee Record</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter border border-[#00fbff]/20">
+            <div class="px-6 py-4 border-b border-[#00fbff]/10 flex items-center justify-between bg-[#001f3f]">
+                <h3 class="font-bold text-lg text-[#00fbff]">Edit Fee Record</h3>
+                <button onclick="closeModal()" class="text-[#00fbff]/60 hover:text-[#00fbff]"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form onsubmit="handleUpdateFee(event, '${id}')" class="p-6 space-y-4">
                 <div class="space-y-1">
@@ -944,7 +947,7 @@ function openEditFeeModal(id) {
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#151619] text-white rounded-xl hover:bg-black">Update Fee</button>
+                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#001f3f] text-[#00fbff] rounded-xl hover:bg-[#001233] border border-[#00fbff]/50">Update Fee</button>
                 </div>
             </form>
         </div>
@@ -1031,10 +1034,10 @@ function openEditExpenseModal(id) {
     
     const modal = document.getElementById('modal-container');
     modal.innerHTML = `
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                <h3 class="font-bold text-lg">Edit Expense</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter border border-[#00fbff]/20">
+            <div class="px-6 py-4 border-b border-[#00fbff]/10 flex items-center justify-between bg-[#001f3f]">
+                <h3 class="font-bold text-lg text-[#00fbff]">Edit Expense</h3>
+                <button onclick="closeModal()" class="text-[#00fbff]/60 hover:text-[#00fbff]"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form onsubmit="handleUpdateExpense(event, '${id}')" class="p-6 space-y-4">
                 <div class="space-y-1">
@@ -1053,7 +1056,7 @@ function openEditExpenseModal(id) {
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#151619] text-white rounded-xl hover:bg-black">Update Expense</button>
+                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#001f3f] text-[#00fbff] rounded-xl hover:bg-[#001233] border border-[#00fbff]/50">Update Expense</button>
                 </div>
             </form>
         </div>
@@ -1086,10 +1089,10 @@ function openEditTeacherModal(id) {
     
     const modal = document.getElementById('modal-container');
     modal.innerHTML = `
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                <h3 class="font-bold text-lg">Edit Teacher</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter border border-[#00fbff]/20">
+            <div class="px-6 py-4 border-b border-[#00fbff]/10 flex items-center justify-between bg-[#001f3f]">
+                <h3 class="font-bold text-lg text-[#00fbff]">Edit Teacher</h3>
+                <button onclick="closeModal()" class="text-[#00fbff]/60 hover:text-[#00fbff]"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form onsubmit="handleUpdateTeacher(event, '${id}')" class="p-6 space-y-4">
                 <div class="space-y-1">
@@ -1110,7 +1113,7 @@ function openEditTeacherModal(id) {
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#151619] text-white rounded-xl hover:bg-black">Update Teacher</button>
+                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-[#001f3f] text-[#00fbff] rounded-xl hover:bg-[#001233] border border-[#00fbff]/50">Update Teacher</button>
                 </div>
             </form>
         </div>
@@ -1173,10 +1176,10 @@ function openPaySalaryModal(teacherId) {
     const currentMonth = new Date().toISOString().split('T')[0].substring(0, 7);
     const modal = document.getElementById('modal-container');
     modal.innerHTML = `
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                <h3 class="font-bold text-lg">Pay Salary: ${teacher.name}</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter border border-[#00fbff]/20">
+            <div class="px-6 py-4 border-b border-[#00fbff]/10 flex items-center justify-between bg-[#001f3f]">
+                <h3 class="font-bold text-lg text-[#00fbff]">Pay Salary: ${teacher.name}</h3>
+                <button onclick="closeModal()" class="text-[#00fbff]/60 hover:text-[#00fbff]"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form onsubmit="handlePaySalary(event, '${teacherId}')" class="p-6 space-y-4">
                 <div class="space-y-1">
@@ -1315,7 +1318,7 @@ function renderBackup(container) {
                     </div>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <button onclick="exportData()" class="bg-[#151619] text-white py-3 rounded-xl font-semibold hover:bg-black transition-all flex items-center justify-center gap-2">
+                        <button onclick="exportData()" class="bg-[#001f3f] text-[#00fbff] py-3 rounded-xl font-semibold hover:bg-[#001233] border border-[#00fbff]/30 transition-all flex items-center justify-center gap-2">
                             <i data-lucide="download" class="w-5 h-5"></i>
                             Download Backup
                         </button>

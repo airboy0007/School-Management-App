@@ -1,5 +1,16 @@
 /* Custom styles for Parwaaz e Shaheen Academy */
 
+:root {
+    --navy: #001f3f;
+    --cyan: #00fbff;
+    --gold: #ffd700;
+}
+
+body {
+    background-color: #f0f7ff;
+    color: var(--navy);
+}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -10,18 +21,18 @@
 }
 
 .nav-item.active {
-    background-color: white;
-    color: #151619;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: #00fbff;
+    color: #001f3f;
+    box-shadow: 0 4px 12px rgba(0, 251, 255, 0.3);
 }
 
 .nav-item:not(.active) {
-    color: #9ca3af;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .nav-item:not(.active):hover {
-    color: white;
-    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffd700;
+    background-color: rgba(0, 251, 255, 0.1);
 }
 
 /* Sidebar Collapsed State (Desktop Only) */
@@ -83,11 +94,49 @@
     background: #d1d5db;
 }
 
-/* Card Hover */
+/* Card & Table Theming */
 .stat-card {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-top: 3px solid var(--cyan);
 }
 
+.stat-card.gold-trim {
+    border-top: 3px solid var(--gold);
+}
+
+.table-header-themed {
+    background-color: var(--navy) !important;
+    color: var(--cyan) !important;
+}
+
+.table-header-themed th {
+    color: var(--cyan) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.7rem;
+}
+
+.btn-navy {
+    background-color: var(--navy);
+    color: var(--cyan);
+    border: 1px solid rgba(0, 251, 255, 0.3);
+}
+
+.btn-navy:hover {
+    background-color: #001233;
+}
+
+.btn-gold {
+    background-color: var(--gold);
+    color: var(--navy);
+}
+
+.btn-gold:hover {
+    background-color: #ffcc00;
+}
+
+/* Card Hover */
 .stat-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
