@@ -2,7 +2,7 @@
  * Parwaaz e Shaheen Academy Management System
  * Plain JavaScript Implementation
  */
-console.log('PSA Management System v1.1 Loaded');
+console.log('PSA Management System v1.3 Loaded');
 
 // --- Navigation ---
 function switchTab(tabId) {
@@ -90,18 +90,38 @@ function showNotification(text) {
 // --- Rendering ---
 function render() {
     const container = document.getElementById('view-container');
+    if (!container) {
+        console.error('View container not found!');
+        return;
+    }
     container.innerHTML = '';
     
-    switch (state.activeTab) {
-        case 'dashboard': renderDashboard(container); break;
-        case 'students': renderStudents(container); break;
-        case 'finance': renderFinance(container); break;
-        case 'expenses': renderExpenses(container); break;
-        case 'staff': renderStaff(container); break;
-        case 'backup': renderBackup(container); break;
+    console.log('Rendering tab:', state.activeTab);
+    try {
+        switch (state.activeTab) {
+            case 'dashboard': renderDashboard(container); break;
+            case 'students': renderStudents(container); break;
+            case 'finance': renderFinance(container); break;
+            case 'expenses': renderExpenses(container); break;
+            case 'staff': renderStaff(container); break;
+            case 'backup': 
+                console.log('Executing backup case');
+                renderBackup(container); 
+                break;
+            default:
+                console.warn('Unknown tab:', state.activeTab);
+                container.innerHTML = `<div class="p-8 text-center text-gray-500">View not found: ${state.activeTab}</div>`;
+        }
+    } catch (err) {
+        console.error('Render error:', err);
+        container.innerHTML = `<div class="p-8 text-red-500">Error loading view: ${err.message}</div>`;
     }
     
-    lucide.createIcons();
+    try {
+        lucide.createIcons();
+    } catch (e) {
+        console.warn('Lucide icons could not be initialized:', e);
+    }
 }
 
 // --- Dashboard View ---
