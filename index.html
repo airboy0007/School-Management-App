@@ -11,7 +11,7 @@
 <body class="bg-gray-50 text-gray-900 font-sans">
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside id="sidebar" class="bg-[#151619] text-white flex flex-col fixed h-full z-50 transition-all duration-300 w-64">
+        <aside id="sidebar" class="bg-[#151619] text-white flex flex-col fixed h-full z-50 transition-all duration-300 w-64 -translate-x-full md:translate-x-0 sidebar-collapsed-mobile">
             <div class="p-6 border-b border-white/10 flex items-center justify-between">
                 <div class="flex items-center gap-3 sidebar-content">
                     <div class="bg-white p-2 rounded-xl shrink-0">
@@ -19,7 +19,7 @@
                     </div>
                     <div class="sidebar-label transition-opacity duration-200">
                         <h1 class="font-bold text-lg leading-tight whitespace-nowrap">Parwaaz e Shaheen</h1>
-                        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Academy Management v1.3</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Academy Management v1.8</p>
                     </div>
                 </div>
                 <button onclick="toggleSidebar()" class="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white">
@@ -55,18 +55,35 @@
             </nav>
 
             <div class="p-4 border-t border-white/10 sidebar-content">
-                <div class="bg-white/5 p-4 rounded-2xl">
+                <div class="bg-white/5 p-4 rounded-2xl mb-4">
                     <p class="text-[10px] text-gray-400 uppercase font-bold mb-2 sidebar-label">System Status</p>
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse shrink-0"></div>
                         <span class="text-xs font-medium sidebar-label">Online & Secure</span>
                     </div>
                 </div>
+                <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-red-400 hover:bg-red-500/10 hover:text-red-300">
+                    <i data-lucide="log-out" class="w-5 h-5 shrink-0"></i>
+                    <span class="font-semibold text-sm sidebar-label transition-opacity duration-200">Logout</span>
+                </button>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main id="main-content" class="flex-1 ml-64 p-8 transition-all duration-300">
+        <main id="main-content" class="flex-1 md:ml-64 p-4 md:p-8 transition-all duration-300">
+            <!-- Mobile Header -->
+            <div class="md:hidden flex items-center justify-between mb-6 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="bg-[#151619] p-2 rounded-lg">
+                        <i data-lucide="graduation-cap" class="text-white w-5 h-5"></i>
+                    </div>
+                    <h1 class="font-bold text-sm">Parwaaz e Shaheen</h1>
+                </div>
+                <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+
             <div id="view-container">
                 <!-- Views will be injected here -->
             </div>

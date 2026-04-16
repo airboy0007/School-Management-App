@@ -2,7 +2,7 @@
  * Parwaaz e Shaheen Academy Management System
  * Plain JavaScript Implementation
  */
-console.log('PSA Management System v1.3 Loaded');
+console.log('PSA Management System v1.8 Loaded');
 
 // --- Navigation ---
 function switchTab(tabId) {
@@ -15,6 +15,12 @@ function switchTab(tabId) {
     const navEl = document.getElementById(`nav-${tabId}`);
     if (navEl) navEl.classList.add('active');
     
+    // Close sidebar on mobile
+    if (window.innerWidth < 768) {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.add('-translate-x-full');
+    }
+    
     render();
 }
 
@@ -23,13 +29,19 @@ function toggleSidebar() {
     const mainContent = document.getElementById('main-content');
     const icon = document.getElementById('collapse-icon');
     
-    sidebar.classList.toggle('sidebar-collapsed');
-    mainContent.classList.toggle('main-content-expanded');
-    
-    if (sidebar.classList.contains('sidebar-collapsed')) {
-        icon.setAttribute('data-lucide', 'chevron-right');
+    // Desktop behavior
+    if (window.innerWidth >= 768) {
+        sidebar.classList.toggle('sidebar-collapsed');
+        mainContent.classList.toggle('main-content-expanded');
+        
+        if (sidebar.classList.contains('sidebar-collapsed')) {
+            icon.setAttribute('data-lucide', 'chevron-right');
+        } else {
+            icon.setAttribute('data-lucide', 'chevron-left');
+        }
     } else {
-        icon.setAttribute('data-lucide', 'chevron-left');
+        // Mobile behavior
+        sidebar.classList.toggle('-translate-x-full');
     }
     
     lucide.createIcons();
@@ -60,7 +72,12 @@ let state = {
     ],
     salaries: JSON.parse(localStorage.getItem('psa_salaries')) || [
         { id: 's1', teacherId: 't1', month: '2024-04', amount: 35000, status: 'Paid', paidAt: '2024-04-01' }
-    ]
+    ],
+    filters: {
+        students: { grade: 'All', status: 'All' },
+        finance: { month: 'All', status: 'All' }
+    },
+    staffTab: 'staff'
 };
 
 function saveState() {
@@ -85,6 +102,15 @@ function showNotification(text) {
     document.getElementById('notification-text').innerText = text;
     el.classList.remove('translate-y-24');
     setTimeout(() => el.classList.add('translate-y-24'), 3000);
+}
+
+function handleLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+        showNotification('Logging out...');
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    }
 }
 
 // --- Rendering ---
@@ -133,8 +159,8 @@ function renderDashboard(container) {
     container.innerHTML = `
         <div class="animate-in">
             <div class="mb-8">
-                <h2 class="text-3xl font-bold tracking-tight">Admin Dashboard</h2>
-                <p class="text-gray-500">Welcome back! Here's what's happening at Parwaaz e Shaheen Academy.</p>
+                <h2 class="text-2xl md:text-3xl font-bold tracking-tight">Admin Dashboard</h2>
+                <p class="text-gray-500 text-sm md:text-base">Welcome back! Here's what's happening at Parwaaz e Shaheen Academy.</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -204,21 +230,46 @@ function renderStatCard(label, value, icon, iconClass) {
 
 // --- Student Management View ---
 function renderStudents(container) {
+    const grades = ['All', 'Play Group', 'KG1', 'KG2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'];
+    
+    const filteredStudents = state.students.filter(s => {
+        const gradeMatch = state.filters.students.grade === 'All' || s.grade === state.filters.students.grade;
+        const statusMatch = state.filters.students.status === 'All' || s.status === state.filters.students.status;
+        return gradeMatch && statusMatch;
+    });
+
     container.innerHTML = `
         <div class="animate-in">
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
                 <div>
                     <h2 class="text-2xl font-bold tracking-tight">Student Management</h2>
-                    <p class="text-gray-500">Manage enrollments and student records.</p>
+                    <p class="text-gray-500 text-sm">Manage enrollments and student records.</p>
                 </div>
-                <button onclick="openAddStudentModal()" class="bg-[#151619] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-black transition-all flex items-center gap-2">
-                    <i data-lucide="plus" class="w-5 h-5"></i>
-                    Add Student
-                </button>
+                <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                    <div class="flex-1 lg:flex-none flex items-center gap-2 bg-white px-3 py-1.5 border border-gray-200 rounded-xl shadow-sm">
+                        <span class="text-xs font-bold text-gray-400 uppercase">Grade:</span>
+                        <select onchange="state.filters.students.grade = this.value; render()" class="text-sm font-semibold focus:outline-none bg-transparent w-full">
+                            ${grades.map(g => `<option value="${g}" ${state.filters.students.grade === g ? 'selected' : ''}>${g}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="flex-1 lg:flex-none flex items-center gap-2 bg-white px-3 py-1.5 border border-gray-200 rounded-xl shadow-sm">
+                        <span class="text-xs font-bold text-gray-400 uppercase">Status:</span>
+                        <select onchange="state.filters.students.status = this.value; render()" class="text-sm font-semibold focus:outline-none bg-transparent w-full">
+                            <option value="All" ${state.filters.students.status === 'All' ? 'selected' : ''}>All</option>
+                            <option value="Active" ${state.filters.students.status === 'Active' ? 'selected' : ''}>Active</option>
+                            <option value="Inactive" ${state.filters.students.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                        </select>
+                    </div>
+                    <button onclick="openAddStudentModal()" class="w-full lg:w-auto bg-[#151619] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-black transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                        Add Student
+                    </button>
+                </div>
             </div>
 
             <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <table class="w-full text-left">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left min-w-[700px] lg:min-w-0">
                     <thead class="bg-gray-50 border-b border-gray-100">
                         <tr>
                             <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Student</th>
@@ -229,11 +280,11 @@ function renderStudents(container) {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        ${state.students.map(s => `
+                        ${filteredStudents.length > 0 ? filteredStudents.map(s => `
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4">
                                     <p class="font-bold text-sm">${s.name}</p>
-                                    <p class="text-xs text-gray-500">${s.fatherName}</p>
+                                    <p class="text-xs text-gray-500">${s.fatherName} | ${s.contact || 'No Contact'}</p>
                                 </td>
                                 <td class="px-6 py-4 text-sm">${s.grade}</td>
                                 <td class="px-6 py-4 text-sm font-mono font-bold">${formatPKR(s.monthlyFee)}</td>
@@ -253,31 +304,61 @@ function renderStudents(container) {
                                     </div>
                                 </td>
                             </tr>
-                        `).join('')}
+                        `).join('') : `
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-500">No students found matching your filters.</td>
+                            </tr>
+                        `}
                     </tbody>
                 </table>
             </div>
         </div>
+    </div>
     `;
 }
 
 // --- Finance View ---
 function renderFinance(container) {
+    const months = ['All', ...new Set(state.fees.map(f => f.month))].sort().reverse();
+    
+    const filteredFees = state.fees.filter(f => {
+        const monthMatch = state.filters.finance.month === 'All' || f.month === state.filters.finance.month;
+        const statusMatch = state.filters.finance.status === 'All' || f.status === state.filters.finance.status;
+        return monthMatch && statusMatch;
+    });
+
     container.innerHTML = `
         <div class="animate-in">
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
                 <div>
                     <h2 class="text-2xl font-bold tracking-tight">Financial & Fee Engine</h2>
-                    <p class="text-gray-500">Track fee collections and generate receipts.</p>
+                    <p class="text-gray-500 text-sm">Track fee collections and generate receipts.</p>
                 </div>
-                <button onclick="generateMonthlyFees()" class="bg-[#151619] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-black transition-all flex items-center gap-2">
-                    <i data-lucide="refresh-cw" class="w-5 h-5"></i>
-                    Generate Monthly Fees
-                </button>
+                <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                    <div class="flex-1 lg:flex-none flex items-center gap-2 bg-white px-3 py-1.5 border border-gray-200 rounded-xl shadow-sm">
+                        <span class="text-xs font-bold text-gray-400 uppercase">Month:</span>
+                        <select onchange="state.filters.finance.month = this.value; render()" class="text-sm font-semibold focus:outline-none bg-transparent w-full">
+                            ${months.map(m => `<option value="${m}" ${state.filters.finance.month === m ? 'selected' : ''}>${m}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="flex-1 lg:flex-none flex items-center gap-2 bg-white px-3 py-1.5 border border-gray-200 rounded-xl shadow-sm">
+                        <span class="text-xs font-bold text-gray-400 uppercase">Status:</span>
+                        <select onchange="state.filters.finance.status = this.value; render()" class="text-sm font-semibold focus:outline-none bg-transparent w-full">
+                            <option value="All" ${state.filters.finance.status === 'All' ? 'selected' : ''}>All</option>
+                            <option value="Paid" ${state.filters.finance.status === 'Paid' ? 'selected' : ''}>Paid</option>
+                            <option value="Pending" ${state.filters.finance.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                        </select>
+                    </div>
+                    <button onclick="generateMonthlyFees()" class="w-full lg:w-auto bg-[#151619] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-black transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                        Generate Monthly Fees
+                    </button>
+                </div>
             </div>
 
             <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <table class="w-full text-left">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left min-w-[800px] lg:min-w-0">
                     <thead class="bg-gray-50 border-b border-gray-100">
                         <tr>
                             <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Student</th>
@@ -288,7 +369,7 @@ function renderFinance(container) {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        ${state.fees.map(f => `
+                        ${filteredFees.length > 0 ? filteredFees.map(f => `
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4">
                                     <p class="font-bold text-sm">${(state.students.find(s => s.id === f.studentId) || {}).name || 'Unknown'}</p>
@@ -317,11 +398,16 @@ function renderFinance(container) {
                                     </div>
                                 </td>
                             </tr>
-                        `).join('')}
+                        `).join('') : `
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-500">No fee records found matching your filters.</td>
+                            </tr>
+                        `}
                     </tbody>
                 </table>
             </div>
         </div>
+    </div>
     `;
 }
 
@@ -329,19 +415,20 @@ function renderFinance(container) {
 function renderExpenses(container) {
     container.innerHTML = `
         <div class="animate-in">
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                 <div>
                     <h2 class="text-2xl font-bold tracking-tight">Expense Tracker</h2>
-                    <p class="text-gray-500">Monitor academy operational costs.</p>
+                    <p class="text-gray-500 text-sm">Monitor academy operational costs.</p>
                 </div>
-                <button onclick="openAddExpenseModal()" class="bg-[#151619] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-black transition-all flex items-center gap-2">
+                <button onclick="openAddExpenseModal()" class="w-full sm:w-auto bg-[#151619] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-black transition-all flex items-center justify-center gap-2">
                     <i data-lucide="plus" class="w-5 h-5"></i>
                     Add Expense
                 </button>
             </div>
 
             <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <table class="w-full text-left">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left min-w-[600px] sm:min-w-0">
                     <thead class="bg-gray-50 border-b border-gray-100">
                         <tr>
                             <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Category</th>
@@ -374,6 +461,7 @@ function renderExpenses(container) {
                 </table>
             </div>
         </div>
+    </div>
     `;
 }
 
@@ -381,50 +469,129 @@ function renderExpenses(container) {
 function renderStaff(container) {
     container.innerHTML = `
         <div class="animate-in">
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                 <div>
                     <h2 class="text-2xl font-bold tracking-tight">Staff & Payroll</h2>
-                    <p class="text-gray-500">Manage teachers and process salaries.</p>
+                    <p class="text-gray-500 text-sm">Manage teachers and process salaries.</p>
                 </div>
-                <button onclick="openAddTeacherModal()" class="bg-[#151619] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-black transition-all flex items-center gap-2">
+                <button onclick="openAddTeacherModal()" class="w-full sm:w-auto bg-[#151619] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-black transition-all flex items-center justify-center gap-2">
                     <i data-lucide="plus" class="w-5 h-5"></i>
                     Add Teacher
                 </button>
             </div>
 
-            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <table class="w-full text-left">
-                    <thead class="bg-gray-50 border-b border-gray-100">
-                        <tr>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Teacher</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Expertise</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Salary Rate</th>
-                            <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        ${state.teachers.map(t => `
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4">
-                                    <p class="font-bold text-sm">${t.name}</p>
-                                    <p class="text-xs text-gray-500">${t.contact}</p>
-                                </td>
-                                <td class="px-6 py-4 text-sm">${t.subjectExpertise.join(', ')}</td>
-                                <td class="px-6 py-4 text-sm font-mono font-bold">${formatPKR(t.salaryRate)}</td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <button onclick="openEditTeacherModal('${t.id}')" class="p-2 text-gray-400 hover:text-[#151619] transition-colors" title="Edit Teacher">
-                                            <i data-lucide="edit-2" class="w-5 h-5"></i>
-                                        </button>
-                                        <button onclick="deleteTeacher('${t.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Delete Teacher">
-                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+            <!-- Sub Tabs (Pill Style) -->
+            <div class="flex gap-2 mb-8 bg-gray-100/80 p-1.5 rounded-2xl w-full sm:w-fit border border-gray-200 overflow-x-auto no-scrollbar">
+                <button onclick="state.staffTab = 'staff'; render()" 
+                    class="flex-1 sm:flex-none whitespace-nowrap px-6 sm:px-8 py-2.5 text-sm font-bold rounded-xl transition-all ${state.staffTab === 'staff' ? 'bg-[#151619] text-white shadow-lg' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}">
+                    Staff List
+                </button>
+                <button onclick="state.staffTab = 'payroll'; render()" 
+                    class="flex-1 sm:flex-none whitespace-nowrap px-6 sm:px-8 py-2.5 text-sm font-bold rounded-xl transition-all ${state.staffTab === 'payroll' ? 'bg-[#151619] text-white shadow-lg' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}">
+                    Payroll History
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 gap-8">
+                ${state.staffTab === 'staff' ? `
+                    <!-- Teachers List -->
+                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                            <h3 class="font-bold text-sm uppercase tracking-wider text-gray-500">Active Teachers & Staff</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left min-w-[600px] sm:min-w-0">
+                            <thead class="bg-gray-50 border-b border-gray-100">
+                                <tr>
+                                    <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Teacher</th>
+                                    <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Expertise</th>
+                                    <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Salary Rate</th>
+                                    <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                ${state.teachers.map(t => `
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-6 py-4">
+                                            <p class="font-bold text-sm">${t.name}</p>
+                                            <p class="text-xs text-gray-500">${t.contact}</p>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm">${t.subjectExpertise.join(', ')}</td>
+                                        <td class="px-6 py-4 text-sm font-mono font-bold">${formatPKR(t.salaryRate)}</td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <button onclick="openPaySalaryModal('${t.id}')" class="px-4 py-1.5 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 transition-all flex items-center gap-1">
+                                                    <i data-lucide="banknote" class="w-3 h-3"></i>
+                                                    Pay
+                                                </button>
+                                                <button onclick="openEditTeacherModal('${t.id}')" class="p-2 text-gray-400 hover:text-[#151619] transition-colors" title="Edit Teacher">
+                                                    <i data-lucide="edit-2" class="w-5 h-5"></i>
+                                                </button>
+                                                <button onclick="deleteTeacher('${t.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Delete Teacher">
+                                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                ` : `
+                    <!-- Salary History -->
+                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                            <h3 class="font-bold text-sm uppercase tracking-wider text-gray-500">Salary Payment History</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left min-w-[600px] sm:min-w-0">
+                                <thead class="bg-gray-50 border-b border-gray-100">
+                                    <tr>
+                                        <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Teacher</th>
+                                        <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Month</th>
+                                        <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500">Amount</th>
+                                        <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500 hidden sm:table-cell">Date</th>
+                                        <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    ${state.salaries.length > 0 ? state.salaries.sort((a,b) => new Date(b.paidAt) - new Date(a.paidAt)).map(s => {
+                                        const teacher = state.teachers.find(t => t.id === s.teacherId) || {};
+                                        return `
+                                            <tr class="hover:bg-gray-50 transition-colors">
+                                                <td class="px-6 py-4">
+                                                    <p class="font-bold text-sm">${teacher.name || 'Unknown'}</p>
+                                                    <p class="text-[10px] text-gray-400 sm:hidden">${s.paidAt}</p>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm">${s.month}</td>
+                                                <td class="px-6 py-4 text-sm font-mono font-bold text-green-600">${formatPKR(s.amount)}</td>
+                                                <td class="px-6 py-4 text-sm text-gray-500 hidden sm:table-cell">${s.paidAt}</td>
+                                                <td class="px-6 py-4 text-right">
+                                                    <div class="flex items-center justify-end gap-1 sm:gap-2">
+                                                        <button onclick="printStaffReceipt('${s.id}')" class="p-1.5 sm:p-2 text-gray-400 hover:text-blue-600 transition-colors" title="Print Receipt">
+                                                            <i data-lucide="printer" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                                                        </button>
+                                                        <button onclick="sendStaffWhatsApp('${s.id}')" class="p-1.5 sm:p-2 text-gray-400 hover:text-green-600 transition-colors" title="Send WhatsApp">
+                                                            <i data-lucide="message-square" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                                                        </button>
+                                                        <button onclick="deleteSalaryRecord('${s.id}')" class="p-1.5 sm:p-2 text-gray-400 hover:text-red-600 transition-colors" title="Delete Record">
+                                                            <i data-lucide="trash-2" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('') : `
+                                        <tr>
+                                            <td colspan="5" class="px-6 py-12 text-center text-gray-500">No payment history available.</td>
+                                        </tr>
+                                    `}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `}
             </div>
         </div>
     `;
@@ -440,18 +607,25 @@ function openAddStudentModal() {
                 <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form onsubmit="handleSaveStudent(event)" class="p-6 space-y-4">
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-500 uppercase">Name</label>
-                    <input type="text" name="name" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-gray-500 uppercase">Name</label>
+                        <input type="text" name="name" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-gray-500 uppercase">Father Name</label>
+                        <input type="text" name="fatherName" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                    </div>
                 </div>
                 <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-500 uppercase">Father Name</label>
-                    <input type="text" name="fatherName" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Contact Number</label>
+                    <input type="text" name="contact" placeholder="03xx-xxxxxxx" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1">
                         <label class="text-xs font-bold text-gray-500 uppercase">Grade</label>
                         <select name="grade" class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                            <option>Play Group</option><option>KG1</option><option>KG2</option>
                             <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
                             <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
                             <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
@@ -481,6 +655,7 @@ function handleSaveStudent(e) {
         id: Math.random().toString(36).substr(2, 9),
         name: fd.get('name'),
         fatherName: fd.get('fatherName'),
+        contact: fd.get('contact'),
         grade: fd.get('grade'),
         monthlyFee: Number(fd.get('monthlyFee')),
         admissionDate: new Date().toISOString().split('T')[0],
@@ -564,6 +739,7 @@ function openAddExpenseModal() {
                     <select name="category" class="w-full px-4 py-2 border border-gray-200 rounded-xl">
                         <option>Rent</option><option>Electricity</option><option>Marketing</option>
                         <option>Stationery</option><option>Salaries</option><option>Maintenance</option>
+                        <option>Miscellaneous</option>
                     </select>
                 </div>
                 <div class="space-y-1">
@@ -666,19 +842,25 @@ function openEditStudentModal(id) {
                 <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form onsubmit="handleUpdateStudent(event, '${id}')" class="p-6 space-y-4">
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-500 uppercase">Name</label>
-                    <input type="text" name="name" value="${student.name}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-gray-500 uppercase">Name</label>
+                        <input type="text" name="name" value="${student.name}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-gray-500 uppercase">Father Name</label>
+                        <input type="text" name="fatherName" value="${student.fatherName}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                    </div>
                 </div>
                 <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-500 uppercase">Father Name</label>
-                    <input type="text" name="fatherName" value="${student.fatherName}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Contact Number</label>
+                    <input type="text" name="contact" value="${student.contact || ''}" placeholder="03xx-xxxxxxx" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1">
                         <label class="text-xs font-bold text-gray-500 uppercase">Grade</label>
                         <select name="grade" class="w-full px-4 py-2 border border-gray-200 rounded-xl">
-                            ${['Playgroup', 'Nursery', 'Prep', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'].map(g => `<option ${student.grade === g ? 'selected' : ''}>${g}</option>`).join('')}
+                            ${['Play Group', 'KG1', 'KG2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'].map(g => `<option ${student.grade === g ? 'selected' : ''}>${g}</option>`).join('')}
                         </select>
                     </div>
                     <div class="space-y-1">
@@ -713,6 +895,7 @@ function handleUpdateStudent(e, id) {
             ...state.students[index],
             name: fd.get('name'),
             fatherName: fd.get('fatherName'),
+            contact: fd.get('contact'),
             grade: fd.get('grade'),
             monthlyFee: Number(fd.get('monthlyFee')),
             status: fd.get('status')
@@ -961,9 +1144,136 @@ function deleteExpense(id) {
 function deleteTeacher(id) {
     if (confirm('Delete this teacher?')) {
         state.teachers = state.teachers.filter(t => t.id !== id);
+        state.salaries = state.salaries.filter(s => s.teacherId !== id);
         saveState();
         render();
         showNotification('Teacher deleted');
+    }
+}
+
+function openPaySalaryModal(teacherId) {
+    const teacher = state.teachers.find(t => t.id === teacherId);
+    if (!teacher) return;
+    
+    const currentMonth = new Date().toISOString().split('T')[0].substring(0, 7);
+    const modal = document.getElementById('modal-container');
+    modal.innerHTML = `
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden modal-enter">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                <h3 class="font-bold text-lg">Pay Salary: ${teacher.name}</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="handlePaySalary(event, '${teacherId}')" class="p-6 space-y-4">
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Month</label>
+                    <input type="month" name="month" value="${currentMonth}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Amount</label>
+                    <input type="number" name="amount" value="${teacher.salaryRate}" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Cancel</button>
+                    <button type="submit" class="px-6 py-2 text-sm font-semibold bg-green-600 text-white rounded-xl hover:bg-green-700">Confirm Payment</button>
+                </div>
+            </form>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+    lucide.createIcons();
+}
+
+function handlePaySalary(e, teacherId) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const amount = Number(fd.get('amount'));
+    const month = fd.get('month');
+    
+    const newSalary = {
+        id: 's' + Math.random().toString(36).substr(2, 9),
+        teacherId,
+        month,
+        amount,
+        status: 'Paid',
+        paidAt: new Date().toISOString().split('T')[0]
+    };
+    
+    state.salaries.push(newSalary);
+    
+    // Also record as an expense
+    state.expenses.push({
+        id: 'e' + Math.random().toString(36).substr(2, 9),
+        category: 'Salaries',
+        description: `Salary Payment - ${state.teachers.find(t => t.id === teacherId).name} (${month})`,
+        amount,
+        date: new Date().toISOString().split('T')[0]
+    });
+    
+    saveState();
+    closeModal();
+    render();
+    showNotification('Salary payment recorded');
+}
+
+function printStaffReceipt(id) {
+    const salary = state.salaries.find(s => s.id === id);
+    const teacher = state.teachers.find(t => t.id === salary.teacherId);
+    if (!salary || !teacher) return;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Salary Receipt - ${teacher.name}</title>
+                <style>
+                    body { font-family: sans-serif; padding: 40px; color: #1a1a1a; }
+                    .receipt { max-width: 500px; margin: 0 auto; border: 2px solid #eee; padding: 30px; border-radius: 15px; }
+                    .header { text-align: center; border-bottom: 2px solid #f4f4f4; padding-bottom: 20px; margin-bottom: 20px; }
+                    .row { display: flex; justify-between; margin-bottom: 10px; }
+                    .label { color: #666; font-weight: bold; }
+                    .value { margin-left: auto; font-weight: bold; }
+                    .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #999; }
+                </style>
+            </head>
+            <body>
+                <div class="receipt">
+                    <div class="header">
+                        <h2>Parwaaz e Shaheen Academy</h2>
+                        <p>Salary Payment Receipt</p>
+                    </div>
+                    <div class="row"><span class="label">Teacher Name:</span> <span class="value">${teacher.name}</span></div>
+                    <div class="row"><span class="label">Month:</span> <span class="value">${salary.month}</span></div>
+                    <div class="row"><span class="label">Amount Paid:</span> <span class="value">${formatPKR(salary.amount)}</span></div>
+                    <div class="row"><span class="label">Payment Date:</span> <span class="value">${salary.paidAt}</span></div>
+                    <div class="row"><span class="label">Status:</span> <span class="value">${salary.status}</span></div>
+                    <div class="footer">
+                        <p>This is a computer generated receipt.</p>
+                        <p>Thank you for your dedication!</p>
+                    </div>
+                </div>
+                <script>window.print();</script>
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
+
+function sendStaffWhatsApp(id) {
+    const salary = state.salaries.find(s => s.id === id);
+    const teacher = state.teachers.find(t => t.id === salary.teacherId);
+    if (!salary || !teacher) return;
+
+    const message = `Hello ${teacher.name}, your salary for ${salary.month} of ${formatPKR(salary.amount)} has been processed on ${salary.paidAt}. Thank you! - Parwaaz e Shaheen Academy`;
+    const url = `https://wa.me/${teacher.contact.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+}
+
+function deleteSalaryRecord(id) {
+    if (confirm('Delete this salary record?')) {
+        state.salaries = state.salaries.filter(s => s.id !== id);
+        saveState();
+        render();
+        showNotification('Salary record deleted');
     }
 }
 
@@ -1057,6 +1367,7 @@ Object.assign(window, {
     toggleSidebar,
     closeModal,
     render,
+    handleLogout,
     openAddStudentModal,
     handleSaveStudent,
     deleteStudent,
@@ -1079,6 +1390,11 @@ Object.assign(window, {
     deleteFee,
     deleteExpense,
     deleteTeacher,
+    openPaySalaryModal,
+    handlePaySalary,
+    printStaffReceipt,
+    sendStaffWhatsApp,
+    deleteSalaryRecord,
     renderBackup,
     exportData,
     importData
