@@ -18,16 +18,22 @@ function switchTab(tabId) {
     // Close sidebar on mobile
     if (window.innerWidth < 768) {
         const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
         sidebar.classList.add('-translate-x-full');
+        if (overlay) {
+            overlay.classList.add('hidden', 'opacity-0');
+        }
     }
     
     render();
 }
 
 function toggleSidebar() {
+    console.log('Toggling sidebar...');
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('main-content');
     const icon = document.getElementById('collapse-icon');
+    const overlay = document.getElementById('sidebar-overlay');
     
     // Desktop behavior
     if (window.innerWidth >= 768) {
@@ -41,7 +47,16 @@ function toggleSidebar() {
         }
     } else {
         // Mobile behavior
-        sidebar.classList.toggle('-translate-x-full');
+        const isHidden = sidebar.classList.contains('-translate-x-full');
+        if (isHidden) {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+        } else {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+        }
     }
     
     lucide.createIcons();

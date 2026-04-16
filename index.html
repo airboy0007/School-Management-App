@@ -10,8 +10,11 @@
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
     <div class="flex min-h-screen">
+        <!-- Sidebar Overlay (Mobile) -->
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity duration-300 opacity-0"></div>
+        
         <!-- Sidebar -->
-        <aside id="sidebar" class="bg-[#151619] text-white flex flex-col fixed h-full z-50 transition-all duration-300 w-64 -translate-x-full md:translate-x-0 sidebar-collapsed-mobile">
+        <aside id="sidebar" class="bg-[#151619] text-white flex flex-col fixed inset-y-0 left-0 z-50 transition-all duration-300 w-64 -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none">
             <div class="p-6 border-b border-white/10 flex items-center justify-between">
                 <div class="flex items-center gap-3 sidebar-content">
                     <div class="bg-white p-2 rounded-xl shrink-0">
