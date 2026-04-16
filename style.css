@@ -6,9 +6,29 @@
     --gold: #ffd700;
 }
 
-body {
-    background-color: #f0f7ff;
-    color: var(--navy);
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+}
+
+.touch-target {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    z-index: 1001;
+}
+
+/* Ensure mobile header is NEVER overlapped by content */
+@media (max-width: 767px) {
+    #main-content {
+        padding-top: 6rem !important;
+    }
 }
 
 @keyframes fadeIn {

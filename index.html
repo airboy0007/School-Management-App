@@ -9,6 +9,19 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-[#f0f7ff] text-[#001f3f] font-sans">
+    <!-- Mobile Header (Fixed at top Level) -->
+    <div class="md:hidden fixed top-0 left-0 right-0 z-[1000] bg-[#001f3f] p-4 flex items-center justify-between border-b border-[#00fbff]/20 shadow-2xl shadow-[#00fbff]/10">
+        <div class="flex items-center gap-3">
+            <div class="bg-[#ffd700] p-2 rounded-lg border border-[#ffd700]/30 shadow-sm shadow-[#ffd700]/10">
+                <i data-lucide="graduation-cap" class="text-[#001f3f] w-5 h-5"></i>
+            </div>
+            <h1 class="font-bold text-sm text-[#00fbff]">Parwaaz e Shaheen</h1>
+        </div>
+        <button onclick="toggleSidebar()" class="p-3 -m-3 hover:bg-white/10 rounded-lg transition-colors text-cyan-400 touch-target" aria-label="Toggle Menu">
+            <i data-lucide="menu" class="w-7 h-7"></i>
+        </button>
+    </div>
+
     <div class="flex min-h-screen">
         <!-- Sidebar Overlay (Mobile) -->
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity duration-300 opacity-0"></div>
@@ -73,21 +86,8 @@
         </aside>
 
         <!-- Main Content -->
-        <main id="main-content" class="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 transition-all duration-300 min-h-screen">
-            <!-- Mobile Header -->
-            <div class="md:hidden fixed top-0 left-0 right-0 z-[45] bg-[#001f3f] p-4 flex items-center justify-between border-b border-[#00fbff]/20 shadow-xl shadow-[#00fbff]/10">
-                <div class="flex items-center gap-3">
-                    <div class="bg-[#ffd700] p-2 rounded-lg border border-[#ffd700]/30 shadow-sm shadow-[#ffd700]/10">
-                        <i data-lucide="graduation-cap" class="text-[#001f3f] w-5 h-5"></i>
-                    </div>
-                    <h1 class="font-bold text-sm text-[#00fbff]">Parwaaz e Shaheen</h1>
-                </div>
-                <button onclick="toggleSidebar()" class="p-2 hover:bg-white/10 rounded-lg transition-colors text-cyan-400">
-                    <i data-lucide="menu" class="w-6 h-6"></i>
-                </button>
-            </div>
-
-            <div id="view-container">
+        <main id="main-content" class="flex-1 md:ml-64 p-4 md:p-8 pt-24 md:pt-8 transition-all duration-300 min-h-screen">
+            <div id="view-container" class="relative z-0">
                 <!-- Views will be injected here -->
             </div>
         </main>

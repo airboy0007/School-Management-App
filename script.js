@@ -535,20 +535,32 @@ function renderStaff(container) {
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
-                                ${state.teachers.map(t => `
+                                ${state.teachers.map(t => {
+                                    const now = new Date();
+                                    const localMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                                    const isPaid = state.salaries.some(s => s.teacherId === t.id && s.month === localMonth);
+                                    
+                                    return `
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-6 py-4">
-                                            <p class="font-bold text-sm">${t.name}</p>
-                                            <p class="text-xs text-gray-500">${t.contact}</p>
+                                            <p class="font-bold text-sm text-[#001f3f]">${t.name}</p>
+                                            <p class="text-[10px] text-gray-400">${t.contact}</p>
                                         </td>
-                                        <td class="px-6 py-4 text-sm">${t.subjectExpertise.join(', ')}</td>
-                                        <td class="px-6 py-4 text-sm font-mono font-bold">${formatPKR(t.salaryRate)}</td>
+                                        <td class="px-6 py-4 text-sm font-medium text-gray-600">${t.subjectExpertise.join(', ')}</td>
+                                        <td class="px-6 py-4 text-sm font-mono font-bold text-gray-700">${formatPKR(t.salaryRate)}</td>
                                         <td class="px-6 py-4 text-right">
                                             <div class="flex items-center justify-end gap-2">
-                                                <button onclick="openPaySalaryModal('${t.id}')" class="px-4 py-1.5 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 transition-all flex items-center gap-1">
-                                                    <i data-lucide="banknote" class="w-3 h-3"></i>
-                                                    Pay
-                                                </button>
+                                                ${isPaid ? `
+                                                    <div class="flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1.5 rounded-lg border border-green-200">
+                                                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                                        <span class="text-[10px] font-bold uppercase whitespace-nowrap">Paid</span>
+                                                    </div>
+                                                ` : `
+                                                    <button onclick="openPaySalaryModal('${t.id}')" class="px-4 py-1.5 bg-green-600 text-white rounded-lg text-[10px] font-bold hover:bg-green-700 transition-all flex items-center gap-1 shadow-sm whitespace-nowrap active:scale-95">
+                                                        <i data-lucide="banknote" class="w-3.5 h-3.5"></i>
+                                                        Pay Salary
+                                                    </button>
+                                                `}
                                                 <button onclick="openEditTeacherModal('${t.id}')" class="p-2 text-gray-400 hover:text-cyan-600 transition-colors" title="Edit Teacher">
                                                     <i data-lucide="edit-2" class="w-5 h-5"></i>
                                                 </button>
@@ -557,8 +569,8 @@ function renderStaff(container) {
                                                 </button>
                                             </div>
                                         </td>
-                                    </tr>
-                                `).join('')}
+                                    </tr>`;
+                                }).join('')}
                             </tbody>
                         </table>
                     </div>
